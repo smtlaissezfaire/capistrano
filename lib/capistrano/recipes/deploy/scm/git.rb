@@ -126,6 +126,10 @@ module Capistrano
         def origin
           configuration[:remote] || 'origin'
         end
+        
+        def force
+          configuration[:scm_force_checkout] ? "-f " : ""
+        end
 
         # Performs a clone on the remote machine, then checkout on the branch
         # you want to deploy.
@@ -138,7 +142,7 @@ module Capistrano
           if depth = configuration[:git_shallow_clone]
             args << "--depth #{depth}"
           end
-
+          
           execute = []
           if args.empty?
             execute << "#{git} clone #{verbose} #{configuration[:repository]} #{destination}"
@@ -147,7 +151,7 @@ module Capistrano
           end
 
           # checkout into a local branch rather than a detached HEAD
-          execute << "cd #{destination} && #{git} checkout #{verbose} -b deploy #{revision}"
+          execute << "cd #{destination} && #{git} checkout #{force}#{verbose} -b deploy #{revision}"
           
           if configuration[:git_enable_submodules]
             execute << "#{git} submodule #{verbose} init"

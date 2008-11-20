@@ -46,6 +46,19 @@ class DeploySCMGitTest < Test::Unit::TestCase
     rev = 'c2d9e79'
     assert_equal "git clone  git@somehost.com:project.git /var/www && cd /var/www && git checkout  -b deploy #{rev}", @source.checkout(rev, dest)
   end
+  
+  def test_checkout_with_force_branch_switching
+    @config[:repository] = "git@somehost.com:project.git"
+    @config[:scm_force_checkout] = true
+    dest = "/var/www"
+    rev = 'c2d9e79'
+    assert_equal "git clone -q git@somehost.com:project.git /var/www && cd /var/www && git checkout -f -q -b deploy #{rev}", @source.checkout(rev, dest)
+
+    # With :scm_command
+    git = "/opt/local/bin/git"
+    @config[:scm_command] = git
+    assert_equal "#{git} clone -q git@somehost.com:project.git /var/www && cd /var/www && #{git} checkout -f -q -b deploy #{rev}", @source.checkout(rev, dest)
+  end
 
   def test_diff
     assert_equal "git diff master", @source.diff('master')
